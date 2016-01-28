@@ -3,8 +3,10 @@
 #include <string>
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
+#include "board.hpp"
 #include "font.hpp"
 #include "text_renderer.hpp"
+#include "board_renderer.hpp"
 
 class Game
 {
@@ -14,9 +16,13 @@ public:
     void run();
     void quit();
 
-private:
     std::string title = "Entangled";
     int width = 800, height = 600;
+
+    glm::mat4 view_projection;
+
+    Board board;
+    BoardRenderer* board_renderer = nullptr;
 
     Font* font = nullptr;
     TextRenderer* text_renderer = nullptr;
@@ -33,4 +39,6 @@ private:
     void update();
     void destroy();
     void finalize();
+
+    void drawFPS();
 };

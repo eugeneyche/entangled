@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 struct Tile
 {
     enum class Type
@@ -8,7 +11,10 @@ struct Tile
         BLOCK,
         NORMAL
     };
-    
+
+    bool is_focus;
+    float rotation_offset; // this should be between -60 and 60 in radians
+
     Type type;
     int rotation;
     int link [12];
@@ -18,7 +24,9 @@ struct Tile
 class Board
 {
 public:
-    Board(const std::string& path);
+    Board();
+
+    void load(const std::string& path);
 
     int getWidth() const;
     int getHeight() const;

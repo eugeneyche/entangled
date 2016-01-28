@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include "shader.hpp"
 #include "font.hpp"
 
@@ -9,7 +10,7 @@ public:
     TextRenderer(int screen_width, int screen_height);
     ~TextRenderer();
 
-    void draw(const std::string& message, int x, int y, Font* font);
+    void draw(const std::string& message, int x, int y, const glm::vec3& color, Font* font);
 
 private:
     int screen_width_ = 0;
@@ -21,6 +22,7 @@ private:
 
     GLint screen_width_location_ = -1;
     GLint screen_height_location_ = -1;
+    GLint color_location = -1;
     GLint uv_rects_location_ = -1;
     GLint screen_rects_location_ = -1;
     GLint atlas_location_ = -1;

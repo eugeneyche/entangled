@@ -4,7 +4,9 @@
 #include "board.hpp"
 #include "error.hpp"
 
-Board::Board(const std::string& path)
+Board::Board() { }
+
+void Board::load(const std::string& path)
 {
     std::ifstream file (path);
     if (!file.is_open())

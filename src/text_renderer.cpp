@@ -1,6 +1,6 @@
 #include <vector>
 #include <GL/glew.h>
-#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "text_renderer.hpp"
 
 TextRenderer::TextRenderer(int screen_width, int screen_height)
@@ -15,6 +15,7 @@ TextRenderer::TextRenderer(int screen_width, int screen_height)
 
     screen_width_location_ = glGetUniformLocation(program_, "screen_width");
     screen_height_location_ = glGetUniformLocation(program_, "screen_height");
+    color_location = glGetUniformLocation(program_, "color");
     uv_rects_location_ = glGetUniformLocation(program_, "uv_rects");
     screen_rects_location_ = glGetUniformLocation(program_, "screen_rects");
     atlas_location_ = glGetUniformLocation(program_, "atlas");
@@ -46,7 +47,7 @@ TextRenderer::~TextRenderer()
     glDeleteProgram(program_);
 }
 
-void TextRenderer::draw(const std::string& message, int x, int y, Font* font)
+void TextRenderer::draw(const std::string& message, int x, int y, const glm::vec3& color, Font* font)
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -74,6 +75,7 @@ void TextRenderer::draw(const std::string& message, int x, int y, Font* font)
     glUseProgram(program_);
     glUniform1f(screen_width_location_, screen_width_);
     glUniform1f(screen_height_location_, screen_height_);
+    glUniform3fv(color_location, 1, glm::value_ptr(color));
     glUniform4fv(uv_rects_location_, message.size(), uv_rects.data());
     glUniform4fv(screen_rects_location_, message.size(), screen_rects.data());
     glActiveTexture(GL_TEXTURE0);

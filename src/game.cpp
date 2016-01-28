@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_ttf.h>
+#include <glm/gtc/matrix_transform.hpp>
 #include "error.hpp"
 #include "game.hpp"
 #include "shader.hpp"
@@ -90,15 +91,29 @@ void Game::setup()
 
     font = new Font("res/font/gamegirl.ttf", 18);
     text_renderer = new TextRenderer(width, height);
-}
 
-    static int count = 0;
+    board.load("res/grid/basic.grid");
+    board_renderer = new BoardRenderer();
+
+    float aspect = float(width) / height;
+    view_projection = 
+        glm::perspective(1.0f, aspect, 0.1f, 100.0f) *
+        glm::lookAt(
+                glm::vec3(0.0f, 0.0f, 10.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f));
+}
 
 void Game::update()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-    count++;
-    text_renderer->draw("fps: " + std::to_string(int(fps)), 10, 10, font);
+    while (int error = glGetError())
+    {
+        std::cerr << "GL Error (" << error << ")" << std::endl;
+    }
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    board_renderer->draw(view_projection, &board);
+    drawFPS();
 }
 
 void Game::destroy()
@@ -112,4 +127,15 @@ void Game::finalize()
     SDL_DestroyWindow(window);
     TTF_Quit();
     SDL_Quit();
+}
+
+void Game::drawFPS()
+{
+    glm::vec3 color {0.5f, 1.0f, 0.5f};
+    if (fps < 45)
+        color = glm::vec3 {1.0f, 1.0f, 0.5f};
+    if (fps < 30)
+        color = glm::vec3 {1.0f, 5.0f, 0.5f};
+        
+    text_renderer->draw("fps: " + std::to_string(int(fps)), 10, 10, color, font);
 }
