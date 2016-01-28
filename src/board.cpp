@@ -19,7 +19,7 @@ Board::Board(const std::string& path)
     for (int i = 0; i < height_; i++)
     {
         getline(file, line);
-        for (int j = 0; j < width_ && j < line.size(); j++)
+        for (int j = 0; j < width_ && j < static_cast<int>(line.size()); j++)
         {
             switch (line[i])
             {

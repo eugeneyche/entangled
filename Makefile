@@ -4,9 +4,9 @@ BUILD_DIR	:= .build
 BIN_DIR		:= bin
 
 CC			:= g++
-CFLAGS		:= -O2 -msse2 -std=c++14 -Wall -Wno-unused-result
+CFLAGS		:= -g -O2 -msse2 -std=c++14 -Wall -Wno-unused-result
 INCLUDES	:= -I$(INC_DIR)
-LIBRARIES	:= -lGL -lGLEW -lSDL2 -lSDL2_image
+LIBRARIES	:= -lGL -lGLEW -lSDL2 -lSDL2_image -lSDL2_ttf
 TARGET		:= $(BIN_DIR)/entangled
 SOURCES		:= $(shell find $(SRC_DIR) -name '*.cpp' -type f)
 HEADERS		:= $(shell find $(INC_DIR) -name '*.hpp' -type f)
