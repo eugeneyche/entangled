@@ -19,7 +19,16 @@ public:
     std::string title = "Entangled";
     int width = 800, height = 600;
 
-    glm::mat4 view_projection;
+    const uint8_t* keyboard_state;
+    uint8_t mouse_state;
+    int mouse_x;
+    int mouse_y;
+
+    glm::mat4 projection;
+    glm::mat4 view;
+
+    glm::vec3 camera_pos = glm::vec3 (0.0f, 0.0f, 30.0f);
+    glm::vec3 camera_dir = glm::vec3 (0.0f, 0.0f, -1.0f);
 
     Board board;
     BoardRenderer* board_renderer = nullptr;
@@ -31,6 +40,7 @@ public:
     SDL_Window* window = nullptr;
 
     uint32_t last_ticks = 0u;
+    float delta_time = 0u;
     float fps = 0.0f;
 
     void initialize();

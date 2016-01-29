@@ -22,6 +22,9 @@ void Game::run()
         {
             fps = (fps + (1000.0f / delta_ticks)) / 2;
         }
+        delta_time = delta_ticks / 1000.0f;
+        keyboard_state = SDL_GetKeyboardState(nullptr);
+        mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
         last_ticks = ticks;
         processEvents();
         update();
@@ -96,12 +99,7 @@ void Game::setup()
     board_renderer = new BoardRenderer();
 
     float aspect = float(width) / height;
-    view_projection = 
-        glm::perspective(1.0f, aspect, 0.1f, 100.0f) *
-        glm::lookAt(
-                glm::vec3(0.0f, 0.0f, 10.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f));
+    projection = glm::perspective(1.0f, aspect, 0.1f, 100.0f);
 }
 
 void Game::update()
@@ -110,9 +108,33 @@ void Game::update()
     {
         std::cerr << "GL Error (" << error << ")" << std::endl;
     }
+    
+    if (keyboard_state[SDL_SCANCODE_UP])
+    {
+        camera_pos += delta_time * glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    if (keyboard_state[SDL_SCANCODE_DOWN])
+    {
+        camera_pos += delta_time * glm::vec3(0.0f, -1.0f, 0.0f);
+    }
+    if (keyboard_state[SDL_SCANCODE_LEFT])
+    {
+        camera_pos += delta_time * glm::vec3(-1.0f, 0.0f, 0.0f);
+    }
+    if (keyboard_state[SDL_SCANCODE_RIGHT])
+    {
+        camera_pos += delta_time * glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+
+
+
+    view = glm::lookAt(
+                camera_pos,
+                camera_pos + camera_dir,
+                glm::vec3(0.0f, 1.0f, 0.0f));
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    board_renderer->draw(view_projection, &board);
+    board_renderer->draw(projection, view, &board);
     drawFPS();
 }
 

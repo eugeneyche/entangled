@@ -10,7 +10,7 @@ public:
     BoardRenderer();
     ~BoardRenderer();
 
-    void draw(const glm::mat4& view_projection, Board* board);
+    void draw(const glm::mat4& projection, const glm::mat4& view, Board* board);
 
 private:
     GLuint tile_vao_ = 0u;
@@ -19,6 +19,8 @@ private:
     GLint tile_count_ = 0u;
 
     GLuint tile_program_ = 0u;
+    GLuint tile_world_view_location_ = 0u;
+    GLuint tile_it_world_view_location_ = 0u;
     GLuint tile_world_view_projection_location_ = 0u;
 
     GLuint bezier_program_ = 0u;
@@ -28,4 +30,6 @@ private:
     GLuint bezier_world_view_projection_location_ = 0u;
     GLuint bezier_begin_control_location_ = 0u;
     GLuint bezier_end_control_location_ = 0u;
+
+    glm::vec2 getPosition(int x, int y) const;
 };

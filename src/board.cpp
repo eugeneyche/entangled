@@ -18,7 +18,7 @@ void Board::load(const std::string& path)
     file >> width_ >> height_;
     getline(file, line);
     tiles_.resize(width_ * height_);
-    for (int i = 0; i < height_; i++)
+    for (int i = height_ - 1; i >= 0; i--)
     {
         getline(file, line);
         for (int j = 0; j < width_ && j < static_cast<int>(line.size()); j++)
