@@ -3,9 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "text_renderer.hpp"
 
-TextRenderer::TextRenderer(int screen_width, int screen_height)
-    : screen_width_ (screen_width)
-    , screen_height_ (screen_height)
+TextRenderer::TextRenderer()
 {
     GLuint vert_shader = loadShader(GL_VERTEX_SHADER, "res/shader/text.vert");
     GLuint frag_shader = loadShader(GL_FRAGMENT_SHADER, "res/shader/text.frag");
@@ -13,11 +11,10 @@ TextRenderer::TextRenderer(int screen_width, int screen_height)
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
 
-    screen_width_location_ = glGetUniformLocation(program_, "screen_width");
-    screen_height_location_ = glGetUniformLocation(program_, "screen_height");
+    viewport_location_ = glGetUniformLocation(program_, "viewport");
     color_location = glGetUniformLocation(program_, "color");
-    uv_rects_location_ = glGetUniformLocation(program_, "uv_rects");
-    screen_rects_location_ = glGetUniformLocation(program_, "screen_rects");
+    atlas_bounds_location_ = glGetUniformLocation(program_, "atlas_bounds");
+    screen_bounds_location_ = glGetUniformLocation(program_, "screen_bounds");
     atlas_location_ = glGetUniformLocation(program_, "atlas");
 
     glGenVertexArrays(1, &vao_);
@@ -47,37 +44,43 @@ TextRenderer::~TextRenderer()
     glDeleteProgram(program_);
 }
 
-void TextRenderer::draw(const std::string& message, int x, int y, const glm::vec3& color, Font* font)
+void TextRenderer::draw(
+        const glm::mat4& viewport, 
+        const std::string& message, 
+        const glm::vec2& position, 
+        const glm::vec4& color, 
+        const Font* font)
 {
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    std::vector<GLfloat> uv_rects;
-    std::vector<GLfloat> screen_rects;
-    int cursor_x = x;
-    int cursor_y = y;
+
+    std::vector<GLfloat> atlas_bounds;
+    std::vector<GLfloat> screen_bounds;
+    float cursor_x = position[0];
+    float cursor_y = position[1];
     for (size_t i = 0; i < message.size(); i++)
     {
         GlyphMetrics metrics = font->getGlyphMetrics(message[i]);
-        GlyphUVRect rect = font->getGlyphUVRect(message[i]);
+        GlyphBound bound = font->getGlyphBound(message[i]);
 
-        uv_rects.push_back(rect.minu);
-        uv_rects.push_back(rect.maxu);
-        uv_rects.push_back(rect.minv);
-        uv_rects.push_back(rect.maxv);
+        atlas_bounds.push_back(bound.min_s);
+        atlas_bounds.push_back(bound.max_s);
+        atlas_bounds.push_back(bound.min_t);
+        atlas_bounds.push_back(bound.max_t);
 
-        screen_rects.push_back(cursor_x + metrics.minx);
-        screen_rects.push_back(cursor_x + metrics.maxx);
-        screen_rects.push_back(cursor_y + metrics.miny);
-        screen_rects.push_back(cursor_y + metrics.maxy);
+        screen_bounds.push_back(cursor_x + metrics.min_x);
+        screen_bounds.push_back(cursor_x + metrics.max_x);
+        screen_bounds.push_back(cursor_y + metrics.min_y);
+        screen_bounds.push_back(cursor_y + metrics.max_y);
 
         cursor_x += metrics.advance;
     }
     glUseProgram(program_);
-    glUniform1f(screen_width_location_, screen_width_);
-    glUniform1f(screen_height_location_, screen_height_);
+    glUniformMatrix4fv(viewport_location_, 1, GL_FALSE, glm::value_ptr(viewport));
     glUniform3fv(color_location, 1, glm::value_ptr(color));
-    glUniform4fv(uv_rects_location_, message.size(), uv_rects.data());
-    glUniform4fv(screen_rects_location_, message.size(), screen_rects.data());
+    glUniform4fv(atlas_bounds_location_, message.size(), atlas_bounds.data());
+    glUniform4fv(screen_bounds_location_, message.size(), screen_bounds.data());
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, font->getAtlas());
     glUniform1i(atlas_location_, 0);

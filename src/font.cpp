@@ -18,15 +18,15 @@ Font::Font(const std::string& path, int size)
         char c = FIRST_CHAR + i;
         TTF_GlyphMetrics(
                 font, c, 
-                &glyph_metrics_[i].minx,
-                &glyph_metrics_[i].maxx,
-                &glyph_metrics_[i].miny,
-                &glyph_metrics_[i].maxy,
-                &glyph_metrics_[i].advance);
+                &glyph_metrics_map_[i].min_x,
+                &glyph_metrics_map_[i].max_x,
+                &glyph_metrics_map_[i].min_y,
+                &glyph_metrics_map_[i].max_y,
+                &glyph_metrics_map_[i].advance);
         surfaces[i] = TTF_RenderGlyph_Blended(font, c, color);
     }
-    int row_height = TTF_FontHeight(font);
-    int row_offset = -TTF_FontDescent(font) + 1;
+    int font_height = TTF_FontHeight(font);
+    int font_offset = font_height - TTF_FontAscent(font);
     int num_glyphs_per_row = 16;
     int num_rows = (NUM_GLYPHS - 1) / num_glyphs_per_row + 1;
     int max_row_width = 0;
@@ -43,7 +43,7 @@ Font::Font(const std::string& path, int size)
         if (row_width > max_row_width)
             max_row_width = row_width;
     }
-    int atlas_height = num_rows * row_height;
+    int atlas_height = num_rows * font_height;
     int atlas_width =  max_row_width;
     int cursor_x = 0;
     int cursor_y = 0;
@@ -57,7 +57,7 @@ Font::Font(const std::string& path, int size)
             if (index >= NUM_GLYPHS)
                 break;
             SDL_Surface* surface = surfaces[index];
-            for (int k = 0; k < row_height; k++)
+            for (int k = 0; k < font_height; k++)
             {
                 for (int l = 0; l < surface->w; l++)
                 {
@@ -69,15 +69,16 @@ Font::Font(const std::string& path, int size)
                     }
                 }
             }
-            GlyphMetrics metrics = glyph_metrics_[index];
-            glyph_uv_rects_[index].minu = float(cursor_x + metrics.minx) / atlas_width;
-            glyph_uv_rects_[index].maxu = float(cursor_x + metrics.maxx) / atlas_width;
-            glyph_uv_rects_[index].minv = float(cursor_y + row_offset + metrics.miny) / atlas_height;
-            glyph_uv_rects_[index].maxv = float(cursor_y + row_offset + metrics.maxy) / atlas_height;
+            GlyphMetrics& metrics = glyph_metrics_map_[index];
+            GlyphBound& bound = glyph_bound_map_[index];
+            bound.min_s = double(cursor_x + metrics.min_x) / atlas_width;
+            bound.max_s = double(cursor_x + metrics.max_x) / atlas_width;
+            bound.min_t = double(cursor_y + font_offset + metrics.min_y) / atlas_height;
+            bound.max_t = double(cursor_y + font_offset + metrics.max_y) / atlas_height;
             cursor_x += surface->w;
         }
         cursor_x = 0;
-        cursor_y += row_height;
+        cursor_y += font_height;
     }
     for (int i = 0; i < NUM_GLYPHS; i++)
     {
@@ -114,11 +115,11 @@ GLuint Font::getAtlas() const
 
 GlyphMetrics Font::getGlyphMetrics(char c) const
 {
-    return glyph_metrics_[c - FIRST_CHAR];
+    return glyph_metrics_map_[c - FIRST_CHAR];
 }
 
-GlyphUVRect Font::getGlyphUVRect(char c) const
+GlyphBound Font::getGlyphBound(char c) const
 {
-    return glyph_uv_rects_[c - FIRST_CHAR];
+    return glyph_bound_map_[c - FIRST_CHAR];
 }
 

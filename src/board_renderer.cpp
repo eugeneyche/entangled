@@ -4,56 +4,17 @@
 #include "board_renderer.hpp"
 #include "shader.hpp"
 
-static float sqrt3_over_2 = 1.7320508075688772f / 2;
+static float sqrt3_over_2 = 1.7320508075688772f / 2.0f;
 
-BoardRenderer::BoardRenderer() 
-{ 
-    float depth = 100.0f;
-
+TileRenderer::TileRenderer()
+{
     std::vector<GLfloat> tile_vertex_buffer = {
-        1.0f, 0.0f,           0.0f, 0.0f, 0.0f, 1.0f,
-        0.5f, sqrt3_over_2,   0.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, sqrt3_over_2,  0.0f, 0.0f, 0.0f, 1.0f,
-        -1.0f, 0.0f,          0.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -sqrt3_over_2, 0.0f, 0.0f, 0.0f, 1.0f,
-        0.5f, -sqrt3_over_2,  0.0f, 0.0f, 0.0f, 1.0f,
-
-        1.0f, 0.0f,           -depth, 0.0f, 0.0f, -1.0f,
-        0.5f, sqrt3_over_2,   -depth, 0.0f, 0.0f, -1.0f,
-        -0.5f, sqrt3_over_2,  -depth, 0.0f, 0.0f, -1.0f,
-        -1.0f, 0.0f,          -depth, 0.0f, 0.0f, -1.0f,
-        -0.5f, -sqrt3_over_2, -depth, 0.0f, 0.0f, -1.0f,
-        0.5f, -sqrt3_over_2,  -depth, 0.0f, 0.0f, -1.0f,
-
-        1.0f, 0.0f,           0.0f, 0.5f, sqrt3_over_2, 0.0f,
-        0.5f, sqrt3_over_2,   0.0f, 0.5f, sqrt3_over_2, 0.0f,
-        1.0f, 0.0f,           -depth, 0.5f, sqrt3_over_2, 0.0f,
-        0.5f, sqrt3_over_2,   -depth, 0.5f, sqrt3_over_2, 0.0f,
-
-        0.5f, sqrt3_over_2,   0.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, sqrt3_over_2,  0.0f, 0.0f, 1.0f, 0.0f,
-        0.5f, sqrt3_over_2,   -depth, 0.0f, 1.0f, 0.0f,
-        -0.5f, sqrt3_over_2,  -depth, 0.0f, 1.0f, 0.0f,
-
-        -0.5f, sqrt3_over_2,  0.0f, -0.5f, sqrt3_over_2, 0.0f,
-        -1.0f, 0.0f,          0.0f, -0.5f, sqrt3_over_2, 0.0f,
-        -0.5f, sqrt3_over_2,  -depth, -0.5f, sqrt3_over_2, 0.0f,
-        -1.0f, 0.0f,          -depth, -0.5f, sqrt3_over_2, 0.0f,
-
-        -1.0f, 0.0f,          0.0f, -0.5f, -sqrt3_over_2, 0.0f,
-        -0.5f, -sqrt3_over_2, 0.0f, -0.5f, -sqrt3_over_2, 0.0f,
-        -1.0f, 0.0f,          -depth, -0.5f, -sqrt3_over_2, 0.0f,
-        -0.5f, -sqrt3_over_2, -depth, -0.5f, -sqrt3_over_2, 0.0f,
-
-        -0.5f, -sqrt3_over_2, 0.0f, 0.0f, -1.0f, 0.0f,
-        0.5f, -sqrt3_over_2,  0.0f, 0.0f, -1.0f, 0.0f,
-        -0.5f, -sqrt3_over_2, -depth, 0.0f, -1.0f, 0.0f,
-        0.5f, -sqrt3_over_2,  -depth, 0.0f, -1.0f, 0.0f,
-
-        0.5f, -sqrt3_over_2,  0.0f, 0.5f, -sqrt3_over_2, 0.0f,
-        1.0f, 0.0f,           0.0f, 0.5f, -sqrt3_over_2, 0.0f,
-        0.5f, -sqrt3_over_2,  -depth, 0.5f, -sqrt3_over_2, 0.0f,
-        1.0f, 0.0f,           -depth, 0.5f, -sqrt3_over_2, 0.0f
+         1.0f, 0.0f,          
+         0.5f, sqrt3_over_2,  
+        -0.5f, sqrt3_over_2, 
+        -1.0f, 0.0f,         
+        -0.5f, -sqrt3_over_2,
+         0.5f, -sqrt3_over_2, 
     };
 
     std::vector<GLuint> tile_element_buffer = {
@@ -61,29 +22,6 @@ BoardRenderer::BoardRenderer()
         0u, 2u, 3u,
         0u, 3u, 4u,
         0u, 4u, 5u,
-
-        6u, 11u, 10u,
-        6u, 10u, 9u,
-        6u, 9u, 8u,
-        6u, 8u, 7u,
-
-        12u, 14u, 15u,
-        12u, 15u, 13u,
-
-        16u, 18u, 19u,
-        16u, 19u, 17u,
-
-        20u, 22u, 23u,
-        20u, 23u, 21u,
-
-        24u, 26u, 27u,
-        24u, 27u, 25u,
-
-        28u, 30u, 31u,
-        28u, 31u, 29u,
-
-        32u, 34u, 35u,
-        32u, 35u, 33u,
     };
 
     tile_count_ = tile_element_buffer.size();
@@ -101,11 +39,7 @@ BoardRenderer::BoardRenderer()
             tile_vertex_buffer.data(),
             GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(GLfloat) * 6, 
-            reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tile_ebo_);
     glBufferData(
@@ -120,13 +54,17 @@ BoardRenderer::BoardRenderer()
     glDeleteShader(tile_vert_shader);
     glDeleteShader(tile_frag_shader);
 
-    tile_it_world_view_location_ = glGetUniformLocation(tile_program_, "world_view");
-    tile_it_world_view_location_ = glGetUniformLocation(tile_program_, "it_world_view");
-    tile_world_view_projection_location_ = glGetUniformLocation(tile_program_, "world_view_projection");
+    tile_world_viewport_location_ = glGetUniformLocation(tile_program_, "world_viewport");
     glBindVertexArray(0u);
+
+    // GLuint bezier_vert_shader = loadShader(GL_VERTEX_SHADER, "res/shader/bezier.vert");
+    // GLuint bezier_frag_shader = loadShader(GL_FRAGMENT_SHADER, "res/shader/bezier.frag");
+    // bezier_program_ = loadProgram({tile_vert_shader, berzier_frag_shader});
+    // glDeleteShader(bezier_vert_shader);
+    // glDeleteShader(bezier_frag_shader);
 }
 
-BoardRenderer::~BoardRenderer()
+TileRenderer::~TileRenderer()
 {
     glDeleteVertexArrays(1, &tile_vao_);
     glDeleteBuffers(1, &tile_vbo_);
@@ -134,39 +72,75 @@ BoardRenderer::~BoardRenderer()
     glDeleteProgram(tile_program_);
 }
 
-void BoardRenderer::draw(
-        const glm::mat4& projection, 
-        const glm::mat4& view, 
-        Board* board)
+void TileRenderer::draw(
+        const glm::mat4& viewport,
+        const Tile* tile,
+        const glm::vec2& position,
+        float rotation,
+        float scale)
 {
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
     glUseProgram(tile_program_);
     glBindVertexArray(tile_vao_);
+
+    glm::mat4 world = 
+        glm::translate(glm::mat4(1.0f), glm::vec3(position, 0)) *
+        glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0, 0, 1)) *
+        glm::scale(glm::mat4(1.0f), glm::vec3(scale));
+    glm::mat4 world_viewport = viewport * world;
+    glUniformMatrix4fv(tile_world_viewport_location_, 1, GL_FALSE, 
+            glm::value_ptr(world_viewport));
+    glDrawElements(GL_TRIANGLES, tile_count_, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0u);
+    glUseProgram(0u);
+}
+
+
+BoardRenderer::BoardRenderer() { }
+
+BoardRenderer::~BoardRenderer() { }
+
+void BoardRenderer::draw(
+        const glm::mat4& viewport,
+        const Board* board,
+        const glm::vec2& position,
+        float scale)
+{
+    static float rotation = 0.0f;
     for (int i = 0; i < board->getHeight(); i++)
     {
         for (int j = 0; j < board->getWidth(); j++)
         {
-            glm::vec2 position = getPosition(i, j);
-            glm::mat4 world_view = glm::translate(view, glm::vec3(position, 1));
-            glm::mat4 it_world_view = glm::transpose(glm::inverse(world_view));
-            glm::mat4 world_view_projection = projection * world_view;
-            glUniformMatrix4fv(tile_world_view_location_, 1, GL_FALSE, glm::value_ptr(world_view));
-            glUniformMatrix4fv(tile_it_world_view_location_, 1, GL_FALSE, glm::value_ptr(it_world_view));
-            glUniformMatrix4fv(tile_world_view_projection_location_, 1, GL_FALSE, glm::value_ptr(world_view_projection));
-            glDrawElements(GL_TRIANGLES, tile_count_, GL_UNSIGNED_INT, 0);
+            glm::vec2 tile_position = position + BoardRenderer::getPosition(scale, i, j);
+            if (i == 3 && j == 3)
+            {
+                tile_renderer_.draw(
+                        viewport,
+                        &board->getTile(i, j), 
+                        tile_position, 
+                        rotation, 
+                        32);
+            }
+            else
+            {
+                tile_renderer_.draw(
+                        viewport,
+                        &board->getTile(i, j), 
+                        tile_position, 
+                        0.0f, 
+                        32);
+            }
         }
+        rotation += 0.001f;
     }
-    glBindVertexArray(0u);
 }
 
-glm::vec2 BoardRenderer::getPosition(int x, int y) const
+glm::vec2 BoardRenderer::getPosition(float radius, int i, int j)
 {
-    float radius = 1.2f;
     glm::vec2 position;
-    position[0] = 1.5f * radius * x;
-    position[1] = 2 * radius * sqrt3_over_2 * y;
-    if (x % 2)
+    position[0] = 1.5f * radius * i + radius;
+    position[1] = 2 * radius * sqrt3_over_2 * j + radius * sqrt3_over_2;
+    if (i % 2)
     {
         position[1] += radius * sqrt3_over_2;
     }

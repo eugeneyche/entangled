@@ -4,6 +4,41 @@
 #include "board.hpp"
 #include "error.hpp"
 
+static glm::vec2 lerp_vec2(
+        const glm::vec2& begin,
+        const glm::vec2& end,
+        float amount)
+{
+    return begin * (1 - amount) + end * amount;
+}
+
+static glm::vec2 getPathPosition(int index)
+{
+}
+
+void BezierCurve::update()
+{
+    static int num_subdivides = 10;
+    positions.clear();
+
+    // Basic implementation, switch to recurive later
+    for (int i = 0; i <= num_subdivides; i++)
+    {
+        float amount = float(i) / num_subdivides;
+        glm::vec2 begin_mid = lerp_vec2(begin, end_control, amount);
+        glm::vec2 end_mid = lerp_vec2(begin_control, end, amount);
+        positions.push_back(lerp_vec2(begin_mid, end_mid, amount));
+    }
+}
+
+void Tile::updateCurves()
+{
+    for (int i = 0; i < 12; i++)
+    {
+        curves[i].update();
+    }
+}
+
 Board::Board() { }
 
 void Board::load(const std::string& path)
@@ -55,6 +90,11 @@ Tile& Board::getTile(int x, int y)
     return tiles_[y * width_ + x];
 }
 
+const Tile& Board::getTile(int x, int y) const
+{
+    return tiles_[y * width_ + x];
+}
+
 void Board::randomize(Tile& tile)
 {
     int available [12];
@@ -72,5 +112,4 @@ void Board::randomize(Tile& tile)
         tile.link[available[i]] = available[i + 1];
         tile.link[available[i + 1]] = available[i];
     }
-    // TODO: Weights for bezier curve
 }

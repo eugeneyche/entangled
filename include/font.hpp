@@ -5,19 +5,19 @@
 
 struct GlyphMetrics
 {
-    int minx; 
-    int miny;   
-    int maxx; 
-    int maxy;    
+    int min_x; 
+    int max_x;   
+    int min_y; 
+    int max_y;    
     int advance;
 };
 
-struct GlyphUVRect
+struct GlyphBound
 {
-    float minu;
-    float maxu;
-    float minv;
-    float maxv;
+    float min_s;
+    float min_t;
+    float max_s;
+    float max_t;
 };
 
 class Font
@@ -32,10 +32,10 @@ public:
 
     GLuint getAtlas() const;
     GlyphMetrics getGlyphMetrics(char c) const;
-    GlyphUVRect getGlyphUVRect(char c) const;
+    GlyphBound getGlyphBound(char c) const;
 
 private:
     GLuint atlas_ = 0u;
-    GlyphMetrics glyph_metrics_ [NUM_GLYPHS];
-    GlyphUVRect glyph_uv_rects_ [NUM_GLYPHS];
+    GlyphMetrics glyph_metrics_map_ [NUM_GLYPHS];
+    GlyphBound glyph_bound_map_ [NUM_GLYPHS];
 };

@@ -24,11 +24,7 @@ public:
     int mouse_x;
     int mouse_y;
 
-    glm::mat4 projection;
-    glm::mat4 view;
-
-    glm::vec3 camera_pos = glm::vec3 (0.0f, 0.0f, 30.0f);
-    glm::vec3 camera_dir = glm::vec3 (0.0f, 0.0f, -1.0f);
+    glm::mat4 viewport;
 
     Board board;
     BoardRenderer* board_renderer = nullptr;

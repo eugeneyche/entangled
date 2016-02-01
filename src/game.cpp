@@ -25,6 +25,7 @@ void Game::run()
         delta_time = delta_ticks / 1000.0f;
         keyboard_state = SDL_GetKeyboardState(nullptr);
         mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
+        mouse_y = height - mouse_y;
         last_ticks = ticks;
         processEvents();
         update();
@@ -51,6 +52,10 @@ void Game::initialize()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
     window = SDL_CreateWindow(
             title.c_str(),
             SDL_WINDOWPOS_UNDEFINED,
@@ -58,6 +63,7 @@ void Game::initialize()
             width,
             height,
             SDL_WINDOW_OPENGL);
+
     if (!window)
     {
         fatalError("Failed to create window.");
@@ -73,6 +79,8 @@ void Game::initialize()
         fatalError("Failed to initialize GLEW.");
     }
     glGetError();
+
+    glEnable(GL_MULTISAMPLE);
 }
 
 void Game::processEvents()
@@ -91,15 +99,13 @@ void Game::processEvents()
 void Game::setup()
 {
     glViewport(0, 0, width, height);
+    viewport = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), 0.0f, 1.0f);
 
-    font = new Font("res/font/gamegirl.ttf", 18);
-    text_renderer = new TextRenderer(width, height);
-
-    board.load("res/grid/basic.grid");
+    text_renderer = new TextRenderer();
     board_renderer = new BoardRenderer();
 
-    float aspect = float(width) / height;
-    projection = glm::perspective(1.0f, aspect, 0.1f, 100.0f);
+    font = new Font("res/font/gamegirl.ttf", 16);
+    board.load("res/grid/basic.grid");
 }
 
 void Game::update()
@@ -108,33 +114,9 @@ void Game::update()
     {
         std::cerr << "GL Error (" << error << ")" << std::endl;
     }
-    
-    if (keyboard_state[SDL_SCANCODE_UP])
-    {
-        camera_pos += delta_time * glm::vec3(0.0f, 1.0f, 0.0f);
-    }
-    if (keyboard_state[SDL_SCANCODE_DOWN])
-    {
-        camera_pos += delta_time * glm::vec3(0.0f, -1.0f, 0.0f);
-    }
-    if (keyboard_state[SDL_SCANCODE_LEFT])
-    {
-        camera_pos += delta_time * glm::vec3(-1.0f, 0.0f, 0.0f);
-    }
-    if (keyboard_state[SDL_SCANCODE_RIGHT])
-    {
-        camera_pos += delta_time * glm::vec3(1.0f, 0.0f, 0.0f);
-    }
-
-
-
-    view = glm::lookAt(
-                camera_pos,
-                camera_pos + camera_dir,
-                glm::vec3(0.0f, 1.0f, 0.0f));
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    board_renderer->draw(projection, view, &board);
+    board_renderer->draw(viewport, &board, {100.0f, 0.0f}, 32);
     drawFPS();
 }
 
@@ -142,6 +124,7 @@ void Game::destroy()
 {
     delete font;
     delete text_renderer;
+    delete board_renderer;
 }
 
 void Game::finalize()
@@ -153,11 +136,16 @@ void Game::finalize()
 
 void Game::drawFPS()
 {
-    glm::vec3 color {0.5f, 1.0f, 0.5f};
+    glm::vec4 color {1.0f, 1.0f, 1.0f, 1.0f};
     if (fps < 45)
-        color = glm::vec3 {1.0f, 1.0f, 0.5f};
+        color = glm::vec4 {1.0f, 1.0f, 0.5f, 1.0f};
     if (fps < 30)
-        color = glm::vec3 {1.0f, 5.0f, 0.5f};
+        color = glm::vec4 {1.0f, 5.0f, 0.5f, 1.0f};
         
-    text_renderer->draw("fps: " + std::to_string(int(fps)), 10, 10, color, font);
+    text_renderer->draw(
+            viewport,
+            "fps: " + std::to_string(int(fps)), 
+            {10, 10}, 
+            color, 
+            font);
 }
